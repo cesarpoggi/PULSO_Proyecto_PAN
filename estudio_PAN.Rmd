@@ -1,0 +1,637 @@
+---
+title: "Familia ENAHO"
+author: "Cesar Poggi"
+date: '2022-08-30'
+output: html_document
+---
+
+```{r}
+library(haven)
+library(survey)
+library(tidyverse)
+library(gtsummary)
+library(dplyr)
+library(Hmisc)
+library(plyr) 
+```
+
+#BASE1 - PAN GENERAL
+
+##ENAHO CARACTERÍSTICAS MIEMBROS DEL HOGAR (200)
+
+```{r}
+"A2021" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2021-200.sav?raw=true"
+#"A2020" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2020-200.sav?raw=true"
+#"A2019" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2019-200.sav?raw=true"
+#"A2018" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2018-200.sav?raw=true"
+#"A2017" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2017-200.sav?raw=true"
+
+#"A2016" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2016-200.rda?raw=true"
+
+#"A2015" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2015-200.sav?raw=true"
+#"A2014" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2014-200.sav?raw=true"
+#"A2013" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2013-200.sav?raw=true"
+#"A2012" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2012-200.sav?raw=true"
+#"A2011" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2011-200.sav?raw=true"
+#"A2010" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2010-200.sav?raw=true"
+#"A2009" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2009-200.sav?raw=true"
+#"A2008" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2008-200.sav?raw=true"
+#"A2007" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2007-200.sav?raw=true"
+#"A2006" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2006-200.sav?raw=true"
+```
+
+ANOTACIÓN: Seleccionar aquí abajo uno de los dos chunks disponibles. Si es el año 2016, seleccionar el segundo chunk. El resto de los años corresponde al primer chunk. La diferencia es que el año 2016 tiene una base más pesada y se leerá como archivo Rda. SOLO CORRER UNO DE LOS SIGUIENTES DOS CHUNKS.
+
+*Todos los años (excepto 2016)*
+
+```{r}
+fromGit <- A2021 #SELECCIONAMOS EL AÑO NECESARIO (Ejem. A2022, A2009, etc.)
+MiembroFamilia=read_sav(fromGit)
+```
+
+*Año 2016*
+
+```{r}
+fromGit0.1 <- A2016 
+load(url(fromGit0.1))
+MiembroFamilia<- Base100
+```
+
+\<\<<REVISIÓN CONDICIONAL>\>\> Revisar la base de datos: corremos el chunk si es que hay espacios en blanco en las variables seleccionadas
+
+```{r REVISION CONDICIONAL 1}
+#MiembroFamilia$UBIGEO <- gsub("[[:space:]]","0",MiembroFamilia$UBIGEO)
+#MiembroFamilia$VIVIENDA <- gsub("[[:space:]]","0",MiembroFamilia$VIVIENDA)
+#MiembroFamilia$ESTRATO <- gsub("[[:space:]]","0",MiembroFamilia$ESTRATO)
+#MiembroFamilia$CONGLOME <- gsub("[[:space:]]","0",MiembroFamilia$CONGLOME)
+#MiembroFamilia$HOGAR <- gsub("[[:space:]]","0",MiembroFamilia$HOGAR)
+```
+
+Seleccionamos a aquellos miembros de la familia que no hayan estado fuera del hogar por más de 30 días. Solo aquellos que marcaron NO(2) a esta pregunta serán considerados para la cantidad total de miembros por hogar. También seleccionaremos solo a aquellas personas que tienen más de un año de edad, ya que estas son las que pueden comer pan.
+
+```{r}
+MiembroFamFILTR <- MiembroFamilia %>%
+  filter(P205 == 2)%>%
+  filter(P208A >= 1)
+
+MiembroFamFILTR$VIVIENDA=as.character(MiembroFamFILTR$VIVIENDA)
+MiembroFamFILTR$CONGLOME=as.character(MiembroFamFILTR$CONGLOME)
+MiembroFamFILTR$HOGAR=as.character(MiembroFamFILTR$HOGAR)
+```
+
+Hacemos un aggregate que nos sume la pregunta P204 ("¿Es miembro de la familia?"). Debido a que todos los casos restantes han respondido con que SÍ(1) son miembros, la suma de estos 1 nos dará la cantidad de miembros por hogar.
+
+```{r}
+MiembroFamAGGRE = aggregate(P204 ~ CONGLOME + VIVIENDA + HOGAR, data = MiembroFamFILTR,sum)
+```
+
+##ENAHO CONSUMO DE PAN (601)
+
+ANOTACIÓN: Correr el código del año que se quiere trabajar. En los links se podrá ver que los nombres de los archivos tienen el siguiente formato "X2021BeginWith01". Una vez identifiquemos el nombre del archivo que tiene el año que queremos analizar, le quitamos el \# al inicio de la linea del código y nos aseguramos que las otras lineas de código que empiezan con B20XX tengan el \# al inicio de la línea de código.
+
+Solo debe de haber una de esas líneas sin el #, y esa linea es la del archivo que queremos trabajar. Todas la lineas deben de mantener el "B20XX" al inicio. NO CAMBIAR.
+
+```{r}
+"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2021BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2020BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2019BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2018BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2017BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2016BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2015BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2014BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2013BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2012BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2011BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2010BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2009BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2008BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2007BeginWith01.rda?raw=true"
+#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2006BeginWith01.rda?raw=true"
+```
+
+Cargamos la data
+
+```{r}
+fromGit2 = B20XX
+load(url(fromGit2))
+```
+
+-\>KEY1
+
+ANOTACIÓN: En el chunck contiguo cambiar el nombre de la data extraída desde GitHub. Todos tendrán el formato de "X20XXTODO01" y se tiene que modificar las dos XX por los dos últimas números del año que se requiera. Seleccionamos todos los casos que tienen la variable P601A el valor "0100", es decir, la categoría de pan general. Posteriomente filtramos por la variable P601B aquellos que sí (1) obtuvieron pan.
+
+```{r}
+panPRIMERO = X2021TODO01[grep("0100", X2021TODO01$P601A, perl=TRUE), ] #OBSERVACIONES DEBEN COINCIDIR CON MiembroFamAGGRE
+panPRIMERO <- panPRIMERO %>%
+  filter(P601B == 1)
+
+#REVISAR ANTES DE CORRER
+#Correr para recuperar los labels de dónde consiguió el producto
+panPRIMERO[,c(12:18)]=sapply(panPRIMERO[,c(12:18)], haven::as_factor)
+```
+
+\<\<<REVISIÓN CONDICIONAL>\>\> Verificamos si hay filas que tienen NA tanto en Cantidad Comprada (I601B2) y Cantidad Obtenida (I601D2)
+
+```{r REVISION CONDICIONAL 2}
+#AGREGAR ! PARA SEÑALAR AQUELLOS QUE "NO SON"
+#REVISAR ANTES DE CORRER
+panPRIMERO[with(panPRIMERO, is.na(I601B2) & is.na(I601D2)),] 
+
+#2021 tiene 2
+#2020 tiene 11
+#2019 tiene 894
+#2018 tiene 0
+#2017 tiene 0
+#2016 tiene 129
+#2015 tiene 69
+#2014 tiene 127
+#2013 tiene 2
+#2012 tiene 0
+#2011 tiene 0
+#2010 tiene 0
+#2009 tiene 1097
+#2008 tiene 0
+#2007 tiene 0
+#2006 tiene 0
+```
+
+\<\<<REVISIÓN CONDICIONAL>\>\> Verificamos: Si hay casos como los mencionados los descartamos
+
+```{r REVISION CONDICIONAL 3}
+panPRIMERO <- panPRIMERO %>%
+  filter(!if_all(c(I601B2, I601D2), is.na))
+```
+
+Suma de Cantidad Comprada (I601B2) y Cantidad Obtenida (I601D2) -\> nos dará la Cantidad Consumida (I601Z2) total por hogar
+
+```{r}
+panPRIMERO$I601Z2 <- rowSums(panPRIMERO[,c("I601B2", "I601D2")], na.rm=TRUE)
+```
+
+Mergeamos la base de Consumo de Pan (601) con (MiembroFamAGGRE) que incluye la variable P204, que ahora nos indica el número "real" de miembros por hogar. La base principal ahora se llamará PANxFAM.
+
+```{r}
+PANxFAM=merge(panPRIMERO,MiembroFamAGGRE)
+```
+
+Dividimos la recién creada variable de Cantidad Consumida (I601Z2) con la variable de cantidad de miembros del hogar (P204) -\> Nos dará el consumo per cápita
+
+```{r}
+PANxFAM$ConsumPerCap=(PANxFAM$I601Z2)/(PANxFAM$P204) 
+```
+
+Eliminamos el factor de expansión de la base de Consumo de Pan (601) para reemplazarlo posteriormente DISCLAIMER: Año 2012 mantendrá el FACTOR07 de la base 601, no será reemplazada DISCLAIMER: Desde el año 2020 hay dos factores de expansición, el FACTOR07 y el FACTOR_P
+
+```{r}
+#REVISAR ANTES DE CORRER
+PANxFAM <- PANxFAM[-c(38)]
+```
+
+##ENAHO INFORMACIÓN DEL HOGAR (100)
+
+```{r}
+"C2021" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2021-100res.sav?raw=true"
+#"C2020" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2020-100res.sav?raw=true"
+#"C2019" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2019-100res.sav?raw=true"
+#"C2018" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2018-100res.sav?raw=true"
+#"C2017" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2017-100res.sav?raw=true"
+#"C2016" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2016-100res.sav?raw=true"
+#"C2015" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2015-100res.sav?raw=true"
+#"C2014" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2014-100res.sav?raw=true"
+#"C2013" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2013-100res.sav?raw=true"
+#"C2012" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2012-100res.sav?raw=true"
+#"C2011" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2011-100res.sav?raw=true"
+#"C2010" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2010-100res.sav?raw=true"
+#"C2009" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2009-100res.sav?raw=true"
+#"C2008" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2008-100res.sav?raw=true"
+#"C2007" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2007-100res.sav?raw=true"
+#"C2006" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2006-100res.sav?raw=true"
+```
+
+Cargamos la base
+
+```{r}
+fromGit3 <- C2021 #SELECCIONAR EL AÑO NECESARIO (Ejem. D2014, D2007, etc.)
+Base100 = read_sav(fromGit3)
+```
+
+Mergemos a base principal con esta base (base100)
+
+```{r}
+PANxFAM=merge(PANxFAM, Base100, by = c("CONGLOME", "VIVIENDA", "HOGAR", "UBIGEO", "ESTRATO"))
+```
+
+\<\<<REVISIÓN CONDICIONAL>\>\> Comprobemos razón de inconsistencia de filas entre el merge de PANxFAM (601, 200) + Base100 (100), con panPRIMERO. Inconsistencias en la base mergeada (PANxFAM) se producen por el diferente de DOMINIO asignado a los mismos hogares. Con el merge posterior se eliminan estos casos.
+
+```{r REVISION CONDICIONAL 4}
+#PANxFAM_PRUEBA=merge(PANxFAM, Base100, by = c("CONGLOME", "VIVIENDA", "HOGAR", "UBIGEO", "ESTRATO"))
+#PANxFAM_PRUEBA=PANxFAM_PRUEBA[-c(40)] #Igualar columnas para el setdiff
+#colnames(PANxFAM_PRUEBA)[40] = c("FACTOR07")
+#setdiff(PANxFAM,PANxFAM_PRUEBA)
+#
+#(Base100 %>% #Comparamos el resultado anterior del setdiff con este filtro de la Base100
+#  filter(CONGLOME == "3919") %>%
+#  filter(VIVIENDA == "035" | VIVIENDA == "073" | VIVIENDA == "094" | VIVIENDA == "129" | VIVIENDA == #"169"))
+```
+
+-\>KEY2
+
+Establecemos 2 divisiones en Base al ESTRATO: 1 Urbano, 2 Rural
+
+```{r}
+PANxFAM$ESTRATO2 = ifelse(PANxFAM$ESTRATO == 1 | PANxFAM$ESTRATO == 2 | PANxFAM$ESTRATO == 3 | PANxFAM$ESTRATO == 4 | PANxFAM$ESTRATO == 5 | PANxFAM$ESTRATO == 6, 1,
+                                     ifelse(PANxFAM$ESTRATO == 7 | PANxFAM$ESTRATO == 8,2,0))
+```
+
+Establecemos 4 divisiones en Base al DOMINIO: 1 Costa, 2 Sierra, 3 Selva, 4 Lima Metropolitana y Callao
+
+```{r}
+#REVISAR ANTES DE CORRER
+PANxFAM[,c(8)]=sapply(PANxFAM[,c(8)], haven::as_factor) #CONVERTIR EL DOMINIO A FACTOR
+
+PANxFAM$DOM3 = ifelse(PANxFAM$DOMINIO == "Sierra Centro" | PANxFAM$DOMINIO == "Sierra Sur" | PANxFAM$DOMINIO =="Sierra Norte", 2,
+                              ifelse(PANxFAM$DOMINIO == "Costa Centro" | PANxFAM$DOMINIO == "Costa Sur" | PANxFAM$DOMINIO =="Costa Norte", 1, 
+                                     ifelse(PANxFAM$DOMINIO == "Selva", 3,
+                                            ifelse(PANxFAM$DOMINIO == "Lima Metropolitana", 4,0))))
+
+PANxFAM$DOM3 = as.character(PANxFAM$DOM3)
+```
+
+Combinamos las variables DOM3 y ESTRATO2 para hacer una nueva variable con las categorias de Costa Rural (2), Costa Urbana (1), Sierra Rural (4), Sierra Urbana (3), Selva Rural (6), Selva Urbana (5) y Lima Metropolitana (7)
+
+```{r}
+PANxFAM$DomEstr = ifelse(PANxFAM$DOM3 == "1" & PANxFAM$ESTRATO2 == "1", 1,
+                         ifelse(PANxFAM$DOM3 == "1" & PANxFAM$ESTRATO2 == "2", 2,
+                                ifelse(PANxFAM$DOM3 == "2" & PANxFAM$ESTRATO2 == "1", 3,
+                                       ifelse(PANxFAM$DOM3 == "2" & PANxFAM$ESTRATO2 == "2", 4,
+                                              ifelse(PANxFAM$DOM3 == "3" & PANxFAM$ESTRATO2 == "1", 5,
+                                                     ifelse(PANxFAM$DOM3 == "3" & PANxFAM$ESTRATO2 == "2", 6,
+                                                            ifelse(PANxFAM$DOM3 == "4", 7,0)))))))
+
+PANxFAM$DomEstr = as.character(PANxFAM$DomEstr)
+```
+
+Modificamos la nueva variable
+
+```{r}
+PANxFAM$DomEstr <- as.factor(PANxFAM$DomEstr)
+levels(PANxFAM$DomEstr) <- c("Costa Urbana", "Costa Rural", "Sierra Urbana", "Sierra Rural", "Selva Urbana", "Selva Rural", "Lima Metropolitana y Callao")
+
+PANxFAM[,c(7:8)]=sapply(PANxFAM[,c(7:8)], haven::as_factor)
+label(PANxFAM$I601Z2) = c("Cantidad consumida")
+label(PANxFAM$ConsumPerCap) = c("Cantidad consumida per capita")
+```
+
+-\> KEY3
+
+##ENTREGABLE 1 - GRÁFICO: Evolución del Consumo per Cápita de pan a través de los años
+
+Hacemos el cálculo del promedio del ConsumPerCap cruzado por DomEstr
+
+```{r}
+library(Hmisc)
+library(plyr) 
+
+datoA <- ddply(PANxFAM,~DomEstr,summarise,  
+              Media=wtd.mean(ConsumPerCap,FACTOR07, na.rm=T))
+```
+
+ANOTACIÓN: Seleccionar la linea de código que contiene el año del cual se trabaja actualmente y correrlo, creando así una base con el nombre del año.
+
+```{r}
+#datoA2009<-datoA
+#datoA2010<-datoA
+#datoA2011<-datoA
+#datoA2012<-datoA
+#datoA2013<-datoA
+#datoA2014<-datoA
+#datoA2015<-datoA
+#datoA2016<-datoA
+#datoA2017<-datoA
+#datoA2018<-datoA
+#datoA2019<-datoA
+#datoA2020<-datoA
+#datoA2021<-datoA
+```
+
+Cambiamos el nombre de la segunda columna de cada subset, hacemos merge y guardamos la base mergeada
+
+```{r}
+#colnames(datoA2009)[2] = c("2009")
+#colnames(datoA2010)[2] = c("2010")
+#colnames(datoA2011)[2] = c("2011")
+#colnames(datoA2012)[2] = c("2012")
+#colnames(datoA2013)[2] = c("2013")
+#colnames(datoA2014)[2] = c("2014")
+#colnames(datoA2015)[2] = c("2015")
+#colnames(datoA2016)[2] = c("2016")
+#colnames(datoA2017)[2] = c("2017")
+#colnames(datoA2018)[2] = c("2018")
+#colnames(datoA2019)[2] = c("2019")
+#colnames(datoA2020)[2] = c("2020")
+#colnames(datoA2021)[2] = c("2021")
+
+#datoALinea <- merge(datoA2009, datoA2010)
+#datoALinea <- merge(datoALinea, datoA2011)
+#datoALinea <- merge(datoALinea, datoA2012)
+#datoALinea <- merge(datoALinea, datoA2013)
+#datoALinea <- merge(datoALinea, datoA2014)
+#datoALinea <- merge(datoALinea, datoA2015)
+#datoALinea <- merge(datoALinea, datoA2016)
+#datoALinea <- merge(datoALinea, datoA2017)
+#datoALinea <- merge(datoALinea, datoA2018)
+#datoALinea <- merge(datoALinea, datoA2019)
+#datoALinea <- merge(datoALinea, datoA2020)
+#datoALinea <- merge(datoALinea, datoA2021)
+
+#datoALinea <- datoALinea %>% mutate_if(is.numeric, round, 2)
+
+#datoALinea <- as.data.frame(t(datoALinea)) 
+
+#write.csv(datoALinea,"C:\\Users\\Alejandro\\Desktop\\PULSO - Cuanti Desk\\Proyecto #Panadería\\PANprimeroxConsumPerCapxDomEstr\\INSUMO_GRAFICO.csv", row.names = TRUE)
+```
+
+Cargar base de datos producida en el chunk anterior desde GitHub
+
+```{r}
+"fromGit4" <- "https://github.com/cesarpoggi/ProyectoPAN/raw/main/INSUMO_GRAFICO.csv"
+INSUMOGraf = read.csv(fromGit4, encoding = "UTF-8")
+
+library(janitor)
+INSUMOGraf <- clean_names(INSUMOGraf)
+colnames(INSUMOGraf)[1] = c("Año")
+```
+
+Hacer línea de tiempo
+
+```{r}
+library(plotly)
+
+fig <- plot_ly(INSUMOGraf, x = ~Año, y = ~ costa_urbana, name = 'COSTA URBANA', type = 'scatter', mode = 'lines', line = list(color = 'rgb(205, 12, 24)', width = 4)) 
+fig <- fig %>% add_trace(y = ~ costa_rural, name = 'COSTA RURAL', type = 'scatter', mode = 'lines',
+        line = list(color = 'rgb(0,100,0)', width = 4))
+fig <- fig %>% add_trace(y = ~sierra_urbana, name = 'SIERRA URBANA', type = 'scatter', mode = 'lines',
+        line = list(color = 'rgb(255,160,122)', width = 4))
+fig <- fig %>% add_trace(y = ~sierra_rural, name = 'SIERRA RURAL', type = 'scatter', mode = 'lines',
+        line = list(color = 'rgb(255,105,180)', width = 4))
+fig <- fig %>% add_trace(y = ~selva_urbana, name = 'SELVA URBANA', type = 'scatter', mode = 'lines',
+        line = list(color = 'rgb(176,196,222)', width = 4))
+fig <- fig %>% add_trace(y = ~selva_rural, name = 'SELVA RURAL', type = 'scatter', mode = 'lines',
+        line = list(color = 'rgb(255,255,0)', width = 4))
+fig <- fig %>% add_trace(y = ~lima_metropolitana_y_callao, name = 'LIMA METROPOLITANA Y CALLAO', type = 'scatter', mode = 'lines',
+        line = list(color = 'rgb(30,144,255)', width = 4))%>%
+  layout(xaxis = list(title = 'año', linecolor="#BCCCDC",
+                      zeroline = F,
+                      showgrid = T
+                     ),
+         yaxis = list(title = 'Dominio', linecolor="#BCCCDC",
+                      zeroline = F,
+                      showgrid = F,
+                      range = c(0,100)
+                      ))
+               
+fig
+```
+
+##ENTREGABLE 2 - TABLA: Pesos (en kg) de Cantidad comprada, obtenida, consumida y consumida per Cápita del año 2021
+
+```{r}
+label(PANxFAM$I601B2) = c("Cantidad comprada")
+label(PANxFAM$I601D2) = c("Cantidad obtenida")
+
+dessin2<- svydesign(id = ~1, #no clusters 
+                      data = PANxFAM,
+                      weight = ~FACTOR07)
+
+
+datoB = tbl_svysummary(data= dessin2, by= DomEstr, 
+               include = c(I601B2, I601D2, I601Z2,ConsumPerCap), 
+               statistic = list(all_continuous() ~ "{mean} ({sd})"), 
+               digits = list(all_continuous() ~ c(2, 2)), missing = "no")
+datoB
+
+#datoB %>%
+#  as_flex_table() %>%
+#  flextable::save_as_docx(path = "C:\\Users\\Alejandro\\Desktop\\PULSO - Cuanti Desk\\Proyecto #Panadería\\PANprimeroxConsumPerCapxDomEstr\\Entregable1.docx")
+```
+
+##ENTREGABLE 2.1 - TABLA: Volumen (en kg) de pan consumido por región
+
+```{r}
+dessin2.1<- svydesign(id = ~1, #no clusters 
+                      data = PANxFAM,
+                      weight = ~FACTOR07)
+
+
+datoB.1 = tbl_svysummary(data= dessin2.1, by= DomEstr, 
+               include = c(I601B2, I601Z2), 
+               statistic = list(all_continuous() ~ "{sum}"), 
+               digits = list(all_continuous() ~ c(0)), missing = "no")
+datoB.1
+
+#datoB.1 %>%
+#  as_flex_table() %>%
+#  flextable::save_as_docx(path = "C:\\Users\\Alejandro\\Desktop\\PULSO - Cuanti Desk\\Proyecto #Panadería\\PANprimeroxConsumPerCapxDomEstr\\EntregableB.1.docx")
+```
+
+------------------------------------------------------------------------
+
+#BASE2 - TIPOS DE PAN
+
+Creamos un nuevo dataset sólo basada en subtipos de pan que sí consumieron.
+
+```{r}
+#Filtrar todos los productos del 0100 al 0107, ahora trabajaremos con los tipos de pan
+#panSUBTIPOS <- X2021TODO01 %>%
+#  filter(P601A == "0101" | P601A == "0102" | P601A == "0103" | P601A == "0104" | P601A == "0105" | #P601A == "0106" | P601A == "0107")
+
+panSUBTIPOS <- X2021TODO01 %>%
+  filter(P601A != "0100")
+
+#Filtramos los que SÍ obtuvieron el producto
+panSUBTIPOS <- panSUBTIPOS %>%
+  filter(P601B == 1)
+```
+
+Creamos la variable de Cantidad Consumida de pan (I601Z2 = I601B2 + I601D2)
+
+```{r}
+#Creamos variable de Cantidad Consumida
+panSUBTIPOS$I601Z2 <- rowSums(panSUBTIPOS[,c("I601B2", "I601D2")], na.rm=TRUE)
+
+#Agregar label a la variable I601Z2
+label(panSUBTIPOS$I601Z2) = c("Cantidad Consumida en kilos")
+```
+
+Establecemos 2 divisiones en Base al ESTRATO: 1 Urbano, 2 Rural
+
+```{r}
+#Establecemos 2 divisiones en Base al ESTRATO: 1 Urbano, 2 Rural
+panSUBTIPOS$ESTRATO2 = ifelse(panSUBTIPOS$ESTRATO == 1 | panSUBTIPOS$ESTRATO == 2 | panSUBTIPOS$ESTRATO == 3 | panSUBTIPOS$ESTRATO == 4 | panSUBTIPOS$ESTRATO == 5 | panSUBTIPOS$ESTRATO == 6, 1,
+                              ifelse(panSUBTIPOS$ESTRATO == 7 | panSUBTIPOS$ESTRATO == 8,2,0))
+
+panSUBTIPOS$ESTRATO2 = as.character(panSUBTIPOS$ESTRATO2)
+```
+
+convertimo la variable DOMINIO a factor para que aparezcan las categorías con nombre. P601A debería pasar a factor también, pero no está porque tiene etiquetas con tildes, por lo tanto la modficiaremos independientemente cada categoría de la varaible.
+
+Además, establecemos 4 divisiones en Base al DOMINIO: 1 Costa, 2 Sierra, 3 Selva, 4 Lima Metropolitana y Callao.
+
+```{r}
+#
+panSUBTIPOS[,c(7)]=sapply(panSUBTIPOS[,c(7)], haven::as_factor)
+
+panSUBTIPOS$DOM3 = ifelse(panSUBTIPOS$DOMINIO == "Sierra Centro" | panSUBTIPOS$DOMINIO == "Sierra Sur" | panSUBTIPOS$DOMINIO == "Sierra Norte", 2,
+                          ifelse(panSUBTIPOS$DOMINIO == "Costa Centro" | panSUBTIPOS$DOMINIO == "Costa Sur" | panSUBTIPOS$DOMINIO =="Costa Norte", 1, 
+                                 ifelse(panSUBTIPOS$DOMINIO == "Selva", 3,
+                                        ifelse(panSUBTIPOS$DOMINIO == "Lima Metropolitana", 4,0))))
+
+panSUBTIPOS$DOM3 = as.character(panSUBTIPOS$DOM3)
+```
+
+Combinamos las variables DOM3 y ESTRATO2 para hacer una nueva variable con las categorias de Costa Rural (2), Costa Urbana (1), Sierra Rural (4), Sierra Urbana (3), Selva Rural (6), Selva Urbana (5) y Lima Metropolitana (7)
+
+```{r}
+panSUBTIPOS$DomEstr = ifelse(panSUBTIPOS$DOM3 == "1" & panSUBTIPOS$ESTRATO2 == "1", 1,
+                         ifelse(panSUBTIPOS$DOM3 == "1" & panSUBTIPOS$ESTRATO2 == "2", 2,
+                                ifelse(panSUBTIPOS$DOM3 == "2" & panSUBTIPOS$ESTRATO2 == "1", 3,
+                                       ifelse(panSUBTIPOS$DOM3 == "2" & panSUBTIPOS$ESTRATO2 == "2", 4,
+                                              ifelse(panSUBTIPOS$DOM3 == "3" & panSUBTIPOS$ESTRATO2 == "1", 5,
+                                                     ifelse(panSUBTIPOS$DOM3 == "3" & panSUBTIPOS$ESTRATO2 == "2", 6,
+                                                            ifelse(panSUBTIPOS$DOM3 == "4", 7,0)))))))
+```
+
+Hacemos algunas modificaciones al tipo de variable creada y los labels
+
+```{r}
+#Modificamos esta nueva variable DomEstr
+panSUBTIPOS$DomEstr <- as.factor(panSUBTIPOS$DomEstr)
+levels(panSUBTIPOS$DomEstr) <- c("Costa Urbana", "Costa Rural", "Sierra Urbana", "Sierra Rural", "Selva Urbana", "Selva Rural", "Lima Metropolitana y Callao")
+panSUBTIPOS$DomEstr = as.character(panSUBTIPOS$DomEstr)
+
+#Modificamos la variable de tipo de pan para poder agregar una categoría otros
+panSUBTIPOS$P601A = as.character(panSUBTIPOS$P601A)
+
+panSUBTIPOS$P601A[panSUBTIPOS$P601A == "0108" | panSUBTIPOS$P601A == "0109" | panSUBTIPOS$P601A == "0110" | panSUBTIPOS$P601A == "0111" | panSUBTIPOS$P601A == "0112"] <- 1111
+
+#Recodificamos la variable P601A, convirtiéndola a factor y asignándole levels 
+panSUBTIPOS$P601A <- recode_factor(panSUBTIPOS$P601A, `0101` = "Pan Corriente o Comun", `0102` = "Pan Tolete", `0103` = "Pan Frances" , `0104` = "Pan Chapla" , `0105` = "Pan Integral" , `0106` = "Pan de Molde Envasado" , `0107` = "Pan de Yema", `1111` = "Otros")
+```
+
+##ENTREGABLE 3 - TABLA: Pesos (en kg) de Cantidad comprada, obtenida y consumida por Tipo de Pan
+
+```{r}
+dessin3<- svydesign(id = ~1, #no clusters 
+                      data = panSUBTIPOS,
+                      weight = ~FACTOR07)
+
+
+datoC = tbl_svysummary(data= dessin3, by= P601A, 
+               include = c(I601B2, I601D2, I601Z2), 
+               statistic = list(all_continuous() ~ "{mean} ({sd})"), 
+               digits = list(all_continuous() ~ c(2, 2)), missing = "no")
+datoC
+
+#datoC %>%
+#  as_flex_table() %>%
+#  flextable::save_as_docx(path = "C:\\Users\\Alejandro\\Desktop\\PULSO - Cuanti Desk\\Proyecto #Panadería\\PANprimeroxConsumPerCapxDomEstr\\Entregable3.docx")
+```
+
+##ENTREGABLE 3 - TABLA ESTRATIFICADA: Pesos (en kg) de Cantidad comprada, obtenida y consumida por Tipo de Pan y con strata de EstrDom
+
+Propuesto por Daniel Sjoberg por combinaciones con pocos casos (funciona con variables unknown o numeric en "include")
+
+```{r}
+fewOb <- panSUBTIPOS[, c("I601B2", "I601D2", "I601Z2", "P601A", "DomEstr", "FACTOR07")]%>%  
+  tibble::as_tibble() %>% 
+  dplyr::group_by(DomEstr, P601A) %>%  
+  dplyr::filter(dplyr::n() > 5) %>%   # remove groups with too few obs
+  dplyr::ungroup()
+```
+
+```{r}
+#Agregar labels a las variables I601B2 e I601D2 para, a la vez, convertirlas en tipo "unknown" y convertir la variable P601A a factor.
+label(fewOb$I601B2) = c("Cantidad comprada en kilos")
+label(fewOb$I601D2) = c("Cantidad obtenida en kilos")
+fewOb[,c(4)]=sapply(fewOb[,c(4)], haven::as_factor) #por alguna razón lo vuelve a chr y funciona
+
+dessin3.1<- svydesign(id = ~1, 
+                    data = fewOb,
+                    weight = ~FACTOR07)
+```
+
+Solución propia (funciona con variables unknown en "include")
+
+```{r}
+#No corría el código si estas variables eran "numeric" en vez de "unknown". El P601A tiene que ser factor.
+
+#label(panSUBTIPOS$I601B2) = c("Cantidad comprada en kilos")
+#label(panSUBTIPOS$I601D2) = c("Cantidad obtenida en kilos")
+
+#Recargamos dessing3 con las modificaciones al label de esas dos variables
+
+#dessin3<- svydesign(id = ~1, #no clusters 
+#                      data = panSUBTIPOS,
+#                      weight = ~FACTOR07)
+```
+
+```{r}
+datoC.1 <- 
+  dessin3.1 %>% 
+  tbl_strata(
+    strata = DomEstr,
+    .tbl_fun = 
+      ~ .x %>% 
+      tbl_svysummary(
+        by = P601A,
+        include = c(I601B2, I601D2, I601Z2),
+        statistic = list(all_continuous() ~ "{mean} ({sd})"), 
+        digits = list(all_continuous() ~ c(2, 2)), missing = "no"))
+datoC.1
+```
+
+##ENTREGABLE 4 - TABLA: Volumen de tipo de pan (en kg) consumido por DomEstr
+
+```{r}
+dessin4<- svydesign(id = ~1, 
+                    data = panSUBTIPOS,
+                    weight = ~FACTOR07)
+
+datoD <- 
+  dessin4%>% 
+  tbl_strata(
+    strata = DomEstr,
+    .tbl_fun = 
+      ~ .x %>% 
+      tbl_svysummary(
+        by = P601A,
+        include = c(I601Z2),
+        statistic = list(all_continuous() ~ "{sum}"), 
+        digits = list(all_continuous() ~ c(0)), missing = "no"))
+datoD
+```
+
+##ENTREGABLE 5 - TABLA: Volumen (en kg) de pan consumido por región, según forma de obtención (P601B4)
+
+```{r}
+panSUBTIPOS[,c(22)]=sapply(panSUBTIPOS[,c(22)], haven::as_factor)
+
+dessin5<- svydesign(id = ~1, #no clusters 
+                      data = panSUBTIPOS,
+                      weight = ~FACTOR07)
+
+
+datoE <- 
+  dessin5 %>% 
+  tbl_strata(
+    strata = DomEstr,
+    .tbl_fun = 
+      ~ .x %>% 
+      tbl_svysummary(
+        by = P601B4,
+        include = c(I601B2),
+        statistic = list(all_continuous() ~ "{sum}"), 
+        digits = list(all_continuous() ~ c(0)), missing = "no"))
+datoE
+```

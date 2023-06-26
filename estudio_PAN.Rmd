@@ -20,24 +20,24 @@ library(plyr)
 ##ENAHO CARACTERÍSTICAS MIEMBROS DEL HOGAR (200)
 
 ```{r}
-"A2021" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2021-200.sav?raw=true"
-#"A2020" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2020-200.sav?raw=true"
-#"A2019" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2019-200.sav?raw=true"
-#"A2018" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2018-200.sav?raw=true"
-#"A2017" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2017-200.sav?raw=true"
+"A2021" <- "https://www.dropbox.com/s/ypvu726lttd855v/Enaho01-2021-200.sav?dl=1"
+#"A2020" <- "https://www.dropbox.com/s/9ydqjkhk3u0ny7e/Enaho01-2020-200.sav?dl=1"
+#"A2019" <- "https://www.dropbox.com/s/71x8f66u82jms0h/Enaho01-2019-200.sav?dl=1"
+#"A2018" <- "https://www.dropbox.com/s/9a53f43qgxk0dbz/Enaho01-2018-200.sav?dl=1"
+#"A2017" <- "https://www.dropbox.com/s/0gd6vtjm2qumlt7/Enaho01-2017-200.sav?dl=1"
 
-#"A2016" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2016-200.rda?raw=true"
+#"A2016" <- "https://www.dropbox.com/s/zbvx24xltsgqid7/Enaho01-2016-200.rda?dl=1"
 
-#"A2015" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2015-200.sav?raw=true"
-#"A2014" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2014-200.sav?raw=true"
-#"A2013" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2013-200.sav?raw=true"
-#"A2012" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2012-200.sav?raw=true"
-#"A2011" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2011-200.sav?raw=true"
-#"A2010" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2010-200.sav?raw=true"
-#"A2009" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2009-200.sav?raw=true"
-#"A2008" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2008-200.sav?raw=true"
-#"A2007" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2007-200.sav?raw=true"
-#"A2006" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2006-200.sav?raw=true"
+#"A2015" <- "https://www.dropbox.com/s/sp3r2obun2f1llz/Enaho01-2015-200.sav?dl=1"
+#"A2014" <- "https://www.dropbox.com/s/zadhefsifuzuahr/Enaho01-2014-200.sav?dl=1"
+#"A2013" <- "https://www.dropbox.com/s/p06kfiiqe5qkshx/Enaho01-2013-200.sav?dl=1"
+#"A2012" <- "https://www.dropbox.com/s/7lwdctko7aseyiv/Enaho01-2012-200.sav?dl=1"
+#"A2011" <- "https://www.dropbox.com/s/297l4xuf9uie4rs/Enaho01-2011-200.sav?dl=1"
+#"A2010" <- "https://www.dropbox.com/s/xxumhtkpwfr9v5l/Enaho01-2010-200.sav?dl=1"
+#"A2009" <- "https://www.dropbox.com/s/csv1pjrri6bvrw2/Enaho01-2009-200.sav?dl=1"
+#"A2008" <- "https://www.dropbox.com/s/0m5i4y0rde6i5d3/Enaho01-2008-200.sav?dl=1"
+#"A2007" <- "https://www.dropbox.com/s/v7wo0kqet6751i2/Enaho01-2007-200.sav?dl=1"
+#"A2006" <- "https://www.dropbox.com/s/ll81uyeq5p1spyc/Enaho01-2006-200.sav?dl=1"
 ```
 
 ANOTACIÓN: Seleccionar aquí abajo uno de los dos chunks disponibles. Si es el año 2016, seleccionar el segundo chunk. El resto de los años corresponde al primer chunk. La diferencia es que el año 2016 tiene una base más pesada y se leerá como archivo Rda. SOLO CORRER UNO DE LOS SIGUIENTES DOS CHUNKS.
@@ -92,22 +92,22 @@ ANOTACIÓN: Correr el código del año que se quiere trabajar. En los links se p
 Solo debe de haber una de esas líneas sin el #, y esa linea es la del archivo que queremos trabajar. Todas la lineas deben de mantener el "B20XX" al inicio. NO CAMBIAR.
 
 ```{r}
-"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2021BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2020BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2019BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2018BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2017BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2016BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2015BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2014BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2013BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2012BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2011BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2010BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2009BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2008BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2007BeginWith01.rda?raw=true"
-#"B20XX" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/X2006BeginWith01.rda?raw=true"
+"B20XX" <- "https://www.dropbox.com/s/4siek6alb8lxbgl/X2021BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/lsulmdgjnvodwkw/X2020BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/p8b9xw4ra0wwfha/X2019BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/1557wqqijeb37wk/X2018BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/806jkykiozf5cki/X2017BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/jzyxtghyq0gfyww/X2016BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/urkzraaunh53tl1/X2015BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/5l1xe60yvu8eh4s/X2014BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/23q2b0pizbobypg/X2013BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/evp3b6pazvh839r/X2012BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/4i5arhmorwwuu1x/X2011BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/5klr7n79bar0az3/X2010BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/5klr7n79bar0az3/X2010BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/6dgyngf9qjss6ua/X2008BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/up94xpc2qe7v4xg/X2007BeginWith01.rda?dl=1"
+#"B20XX" <- "https://www.dropbox.com/s/8lpdpweby0ktgnf/X2006BeginWith01.rda?dl=1"
 ```
 
 Cargamos la data
@@ -119,7 +119,7 @@ load(url(fromGit2))
 
 -\>KEY1
 
-ANOTACIÓN: En el chunck contiguo cambiar el nombre de la data extraída desde GitHub. Todos tendrán el formato de "X20XXTODO01" y se tiene que modificar las dos XX por los dos últimas números del año que se requiera. Seleccionamos todos los casos que tienen la variable P601A el valor "0100", es decir, la categoría de pan general. Posteriomente filtramos por la variable P601B aquellos que sí (1) obtuvieron pan.
+ANOTACIÓN: En el chunck contiguo cambiar el nombre de la data extraída desde GitHub. Todos tendrán el formato de "X20XXTODO01" y se tiene que modificar las dos XX por los dos últimas números del año que se requiera. Seleccionamos todos los casos que tienen en la variable P601A el valor "0100", es decir, la categoría de pan general. Posteriomente filtramos por la variable P601B aquellos que sí (1) obtuvieron pan.
 
 ```{r}
 panPRIMERO = X2021TODO01[grep("0100", X2021TODO01$P601A, perl=TRUE), ] #OBSERVACIONES DEBEN COINCIDIR CON MiembroFamAGGRE
@@ -191,22 +191,22 @@ PANxFAM <- PANxFAM[-c(38)]
 ##ENAHO INFORMACIÓN DEL HOGAR (100)
 
 ```{r}
-"C2021" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2021-100res.sav?raw=true"
-#"C2020" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2020-100res.sav?raw=true"
-#"C2019" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2019-100res.sav?raw=true"
-#"C2018" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2018-100res.sav?raw=true"
-#"C2017" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2017-100res.sav?raw=true"
-#"C2016" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2016-100res.sav?raw=true"
-#"C2015" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2015-100res.sav?raw=true"
-#"C2014" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2014-100res.sav?raw=true"
-#"C2013" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2013-100res.sav?raw=true"
-#"C2012" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2012-100res.sav?raw=true"
-#"C2011" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2011-100res.sav?raw=true"
-#"C2010" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2010-100res.sav?raw=true"
-#"C2009" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2009-100res.sav?raw=true"
-#"C2008" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2008-100res.sav?raw=true"
-#"C2007" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2007-100res.sav?raw=true"
-#"C2006" <- "https://github.com/cesarpoggi/ProyectoPAN/blob/main/Enaho01-2006-100res.sav?raw=true"
+"C2021" <- "https://www.dropbox.com/s/40at06kcr718iqv/Enaho01-2021-100res.sav?dl=1"
+#"C2020" <- "https://www.dropbox.com/s/03b04jmtu2kdajm/Enaho01-2020-100res.sav?dl=0"
+#"C2019" <- "https://www.dropbox.com/s/c3y8x6q426t2cen/Enaho01-2019-100res.sav?dl=0"
+#"C2018" <- "https://www.dropbox.com/s/r5und192phi46xq/Enaho01-2018-100res.sav?dl=0"
+#"C2017" <- "https://www.dropbox.com/s/inzo7tywf7ezb7u/Enaho01-2017-100res.sav?dl=0"
+#"C2016" <- "https://www.dropbox.com/s/79wx77mzg272ddd/Enaho01-2016-100res.sav?dl=0"
+#"C2015" <- "https://www.dropbox.com/s/4owzhvi16as8nw4/Enaho01-2015-100res.sav?dl=0"
+#"C2014" <- "https://www.dropbox.com/s/uuzvlahy0x9ne38/Enaho01-2014-100res.sav?dl=0"
+#"C2013" <- "https://www.dropbox.com/s/jnekb3jsre9mt90/Enaho01-2013-100res.sav?dl=0"
+#"C2012" <- "https://www.dropbox.com/s/qiis6ux9qgceb3x/Enaho01-2012-100res.sav?dl=0"
+#"C2011" <- "https://www.dropbox.com/s/lqmd0q38fnvkagw/Enaho01-2011-100res.sav?dl=0"
+#"C2010" <- "https://www.dropbox.com/s/iuvl9okil1hvdww/Enaho01-2010-100res.sav?dl=0"
+#"C2009" <- "https://www.dropbox.com/s/1b3qgsnivigqia0/Enaho01-2009-100res.sav?dl=0"
+#"C2008" <- "https://www.dropbox.com/s/v8c575fwr1a7pf4/Enaho01-2008-100res.sav?dl=0"
+#"C2007" <- "https://www.dropbox.com/s/5xxovbrmertxjlw/Enaho01-2007-100res.sav?dl=0"
+#"C2006" <- "https://www.dropbox.com/s/konxva2d6c59s7o/Enaho01-2006-100res.sav?dl=0"
 ```
 
 Cargamos la base
@@ -225,14 +225,14 @@ PANxFAM=merge(PANxFAM, Base100, by = c("CONGLOME", "VIVIENDA", "HOGAR", "UBIGEO"
 \<\<<REVISIÓN CONDICIONAL>\>\> Comprobemos razón de inconsistencia de filas entre el merge de PANxFAM (601, 200) + Base100 (100), con panPRIMERO. Inconsistencias en la base mergeada (PANxFAM) se producen por el diferente de DOMINIO asignado a los mismos hogares. Con el merge posterior se eliminan estos casos.
 
 ```{r REVISION CONDICIONAL 4}
-#PANxFAM_PRUEBA=merge(PANxFAM, Base100, by = c("CONGLOME", "VIVIENDA", "HOGAR", "UBIGEO", "ESTRATO"))
+#PANxFAM_PRUEBA=merge(PANxFAM, Base100, by = c("CONGLOME", "VIVIENDA", "HOGAR", "UBIGEO", #"ESTRATO", "FACTOR07", "FACTOR_P"))
 #PANxFAM_PRUEBA=PANxFAM_PRUEBA[-c(40)] #Igualar columnas para el setdiff
 #colnames(PANxFAM_PRUEBA)[40] = c("FACTOR07")
 #setdiff(PANxFAM,PANxFAM_PRUEBA)
-#
+
 #(Base100 %>% #Comparamos el resultado anterior del setdiff con este filtro de la Base100
 #  filter(CONGLOME == "3919") %>%
-#  filter(VIVIENDA == "035" | VIVIENDA == "073" | VIVIENDA == "094" | VIVIENDA == "129" | VIVIENDA == #"169"))
+#  filter(VIVIENDA == "035" | VIVIENDA == "073" | VIVIENDA == "094" | VIVIENDA == "129" | #VIVIENDA == "169"))
 ```
 
 -\>KEY2
